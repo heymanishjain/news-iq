@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-6xl space-y-12 px-4 py-16">
+    <main className="mx-auto max-w-6xl space-y-12 px-4 py-16 bg-white dark:bg-gray-950">
       <header className="text-center space-y-4">
         <p className="text-sm uppercase tracking-wide text-primary font-semibold">NewsIQ</p>
         <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100">RAG-powered News Intelligence</h1>

@@ -15,4 +15,5 @@ class Article(Base):
     published_at = Column(DateTime, nullable=False)
     category = Column(String(64), nullable=False)
     content = Column(Text, nullable=False)
+    image_url = Column(String(512), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

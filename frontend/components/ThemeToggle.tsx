@@ -8,7 +8,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 active:scale-95 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
       aria-label="Toggle theme"
     >
       {theme === "light" ? (
@@ -43,4 +43,3 @@ export function ThemeToggle() {
     </button>
   );
 }
-

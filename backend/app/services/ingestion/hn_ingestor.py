@@ -35,6 +35,12 @@ class HackerNewsIngestor(BaseIngestor):
             content = story.get("text") or story.get("title")
             cleaned_content = clean_html(content)
             published_at = datetime.fromtimestamp(story.get("time", datetime.now().timestamp()), tz=timezone.utc)
+            
+            # Try to extract image from URL metadata or content
+            image_url = None
+            # Hacker News doesn't provide images, but we can try to extract from the article URL
+            # For now, leave as None since HN articles typically don't have images
+            
             article = ArticleCreate(
                 title=story["title"],
                 source="Hacker News",
@@ -42,6 +48,7 @@ class HackerNewsIngestor(BaseIngestor):
                 published_at=published_at,
                 category="technology",
                 content=cleaned_content,
+                image_url=image_url,
             )
             articles.append(article)
         return articles

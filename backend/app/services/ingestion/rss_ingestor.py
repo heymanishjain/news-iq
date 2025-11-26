@@ -21,6 +21,16 @@ RSS_FEEDS = [
         "category": "sports",
         "source": "ESPN",
     },
+    {
+        "url": "https://www.thehindu.com/feeder/default.rss",
+        "category": "general",
+        "source": "The Hindu",
+    },
+    {
+        "url": "https://indianexpress.com/feed/",
+        "category": "general",
+        "source": "The Indian Express",
+    },
 ]
 
 
@@ -45,6 +55,32 @@ class RSSIngestor(BaseIngestor):
                 else:
                     published_at = datetime.now(timezone.utc)
 
+                # Extract image URL from RSS entry
+                image_url = None
+                if "media_content" in entry and len(entry.media_content) > 0:
+                    image_url = entry.media_content[0].get("url")
+                elif "media_thumbnail" in entry and len(entry.media_thumbnail) > 0:
+                    image_url = entry.media_thumbnail[0].get("url")
+                elif "links" in entry:
+                    for link_obj in entry.links:
+                        if link_obj.get("type", "").startswith("image/"):
+                            image_url = link_obj.get("href")
+                            break
+                
+                # Try to extract image from summary/description HTML
+                if not image_url:
+                    import re
+                    summary_html = entry.get("summary", entry.get("description", ""))
+                    if summary_html:
+                        # Look for img tags
+                        img_match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', summary_html, re.IGNORECASE)
+                        if img_match:
+                            image_url = img_match.group(1)
+                        # Look for og:image or twitter:image meta tags in content
+                        og_match = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']', summary_html, re.IGNORECASE)
+                        if og_match:
+                            image_url = og_match.group(1)
+
                 cleaned_article = ArticleCreate(
                     title=entry.get("title", "Untitled"),
                     source=feed["source"],
@@ -52,6 +88,7 @@ class RSSIngestor(BaseIngestor):
                     published_at=published_at,
                     category=feed["category"],
                     content=content_text,
+                    image_url=image_url,
                 )
                 # Attempt to fetch full content if available
                 try:

@@ -11,6 +11,7 @@ class ArticleBase(BaseModel):
     published_at: datetime
     category: str
     content: str
+    image_url: Optional[str] = None
 
 
 class ArticleCreate(ArticleBase):

@@ -46,6 +46,7 @@ def upsert_article(session: Session, article_data: ArticleCreate) -> Article:
         article.published_at = article_data.published_at
         article.category = article_data.category
         article.content = article_data.content
+        article.image_url = article_data.image_url
     else:
         payload = article_data.model_dump()
         payload["url"] = url_str

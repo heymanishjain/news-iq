@@ -65,6 +65,9 @@ class NewsAPIIngestor(BaseIngestor):
                     content = article_data.get("content") or article_data.get("description") or article_data.get("title", "")
                     cleaned_content = clean_html(content)
                     
+                    # Get image URL if available
+                    image_url = article_data.get("urlToImage") or article_data.get("image")
+                    
                     article = ArticleCreate(
                         title=article_data["title"],
                         source=article_data.get("source", {}).get("name", "NewsAPI"),
@@ -72,6 +75,7 @@ class NewsAPIIngestor(BaseIngestor):
                         published_at=published_at,
                         category=category,
                         content=cleaned_content,
+                        image_url=image_url,
                     )
                     articles.append(article)
             except Exception:

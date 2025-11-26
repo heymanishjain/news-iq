@@ -12,19 +12,23 @@ export function SearchBar({ value, onChange }: Props) {
 
   return (
     <div
-      className={`relative rounded-2xl border px-4 py-3 transition-all ${
+      className={`relative rounded-2xl border-2 transition-all duration-300 ${
         isFocused
-          ? "border-primary shadow-lg shadow-primary/10"
-          : "border-gray-200 shadow-sm dark:border-gray-800"
-      } bg-white/80 backdrop-blur dark:bg-gray-900/60`}
+          ? "border-primary shadow-xl shadow-primary/20 dark:shadow-primary/10 bg-white dark:bg-gray-800"
+          : "border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm"
+      }`}
     >
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+      <div className="flex items-center gap-4 px-5 py-4">
+        <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${
+          isFocused 
+            ? "bg-primary text-white" 
+            : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+        }`}>
           <svg
-            className="h-5 w-5"
+            className="h-6 w-6"
             fill="none"
             stroke="currentColor"
-            strokeWidth={2}
+            strokeWidth={2.5}
             viewBox="0 0 24 24"
           >
             <path
@@ -35,21 +39,20 @@ export function SearchBar({ value, onChange }: Props) {
           </svg>
         </div>
         <div className="flex-1">
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 block">
             Search headlines
           </label>
           <input
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="Try “AI in sports” or “market outlook”"
+            placeholder="Search for news, topics, or keywords..."
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className="mt-1 w-full border-none bg-transparent text-lg font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none dark:text-gray-50"
+            className="mt-1 w-full border-none bg-transparent text-lg font-semibold text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none dark:text-gray-50"
           />
         </div>
       </div>
     </div>
   );
 }
-
