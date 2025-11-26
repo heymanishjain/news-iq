@@ -4,27 +4,27 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-6xl space-y-12 px-4 py-16 bg-white dark:bg-gray-950">
-      <header className="text-center space-y-4">
-        <p className="text-sm uppercase tracking-wide text-primary font-semibold">NewsIQ</p>
-        <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-100">RAG-powered News Intelligence</h1>
-        <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+    <main className="mx-auto max-w-6xl space-y-8 sm:space-y-12 px-4 sm:px-6 py-8 sm:py-12 lg:py-16 bg-white dark:bg-gray-950">
+      <header className="text-center space-y-3 sm:space-y-4">
+        <p className="text-xs sm:text-sm uppercase tracking-wide text-primary font-semibold">NewsIQ</p>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100">RAG-powered News Intelligence</h1>
+        <p className="mt-3 sm:mt-4 text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4">
           Stay informed with the latest news from multiple sources. Ask questions and get intelligent answers powered by
           AI.
         </p>
       </header>
 
-      <div className="grid md:grid-cols-2 gap-8 mt-12">
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mt-8 sm:mt-12">
         {/* News Section */}
         <Link
           href="/news"
-          className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-blue-200 dark:border-blue-800"
+          className="group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] sm:hover:scale-105 border border-blue-200 dark:border-blue-800"
         >
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-blue-500 rounded-lg">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-blue-500 rounded-lg">
                 <svg
-                  className="w-6 h-6 text-white"
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -37,16 +37,16 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Browse News</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Browse News</h2>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">
               Explore the latest articles from technology, sports, business, and general news sources. Filter and search
               through our curated collection.
             </p>
-            <div className="flex items-center text-blue-600 font-semibold group-hover:gap-2 transition-all">
+            <div className="flex items-center text-blue-600 font-semibold text-sm sm:text-base group-hover:gap-2 transition-all">
               View Articles
               <svg
-                className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform"
+                className="w-4 h-4 sm:w-5 sm:h-5 ml-1 group-hover:translate-x-1 transition-transform"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -60,19 +60,19 @@ export default function HomePage() {
               </svg>
             </div>
           </div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200 rounded-full -mr-16 -mt-16 opacity-20"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-blue-200 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16 opacity-20"></div>
         </Link>
 
         {/* Ask NewsIQ Section */}
         <Link
           href="/ask-news-iq"
-          className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-purple-200 dark:border-purple-800"
+          className="group relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] sm:hover:scale-105 border border-purple-200 dark:border-purple-800"
         >
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-purple-500 rounded-lg">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 bg-purple-500 rounded-lg">
                 <svg
-                  className="w-6 h-6 text-white"
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -85,16 +85,16 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ask NewsIQ</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Ask NewsIQ</h2>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">
               Chat with our AI assistant to get intelligent answers about the latest news. Ask questions in natural
               language and receive detailed responses with citations.
             </p>
-            <div className="flex items-center text-purple-600 font-semibold group-hover:gap-2 transition-all">
+            <div className="flex items-center text-purple-600 font-semibold text-sm sm:text-base group-hover:gap-2 transition-all">
               Start Chatting
               <svg
-                className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform"
+                className="w-4 h-4 sm:w-5 sm:h-5 ml-1 group-hover:translate-x-1 transition-transform"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -108,12 +108,12 @@ export default function HomePage() {
               </svg>
             </div>
           </div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full -mr-16 -mt-16 opacity-20"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-purple-200 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16 opacity-20"></div>
         </Link>
       </div>
 
       {/* Features Section */}
-      <section className="mt-16 grid md:grid-cols-3 gap-8">
+      <section className="mt-12 sm:mt-16 grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
         <div className="text-center space-y-3">
           <div className="inline-flex p-3 bg-blue-100 rounded-lg">
             <svg

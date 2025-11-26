@@ -12,20 +12,20 @@ export function SearchBar({ value, onChange }: Props) {
 
   return (
     <div
-      className={`relative rounded-2xl border-2 transition-all duration-300 ${
+      className={`relative rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ${
         isFocused
           ? "border-primary shadow-xl shadow-primary/20 dark:shadow-primary/10 bg-white dark:bg-gray-800"
           : "border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/50 backdrop-blur-sm"
       }`}
     >
-      <div className="flex items-center gap-4 px-5 py-4">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${
+      <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4">
+        <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl transition-colors flex-shrink-0 ${
           isFocused 
             ? "bg-primary text-white" 
             : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
         }`}>
           <svg
-            className="h-6 w-6"
+            className="h-5 w-5 sm:h-6 sm:w-6"
             fill="none"
             stroke="currentColor"
             strokeWidth={2.5}
@@ -38,7 +38,7 @@ export function SearchBar({ value, onChange }: Props) {
             />
           </svg>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 block">
             Search headlines
           </label>
@@ -49,7 +49,7 @@ export function SearchBar({ value, onChange }: Props) {
             placeholder="Search for news, topics, or keywords..."
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className="mt-1 w-full border-none bg-transparent text-lg font-semibold text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none dark:text-gray-50"
+            className="mt-1 w-full border-none bg-transparent text-base sm:text-lg font-semibold text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none dark:text-gray-50"
           />
         </div>
       </div>

@@ -23,6 +23,8 @@ type Article = {
   category: string;
 };
 
+const STORAGE_KEY = "news_iq_chat_history";
+
 export function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -30,6 +32,37 @@ export function ChatPanel() {
   const [category, setCategory] = useState("All");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Load messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsedMessages = JSON.parse(stored).map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+        setMessages(parsedMessages);
+      }
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        const serialized = messages.map((msg) => ({
+          ...msg,
+          timestamp: msg.timestamp.toISOString(),
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
+      } catch (error) {
+        console.error("Failed to save chat history:", error);
+      }
+    }
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -166,6 +199,13 @@ export function ChatPanel() {
     }
   };
 
+  const clearChat = () => {
+    if (confirm("Are you sure you want to clear all chat history?")) {
+      setMessages([]);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  };
+
   // Process content to convert "Article X" references to clickable links
   const processArticleReferences = (
     content: string,
@@ -197,7 +237,33 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="flex flex-col h-[650px] rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col h-full rounded-xl sm:rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
+      {/* Header with Clear Button */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Chat History</h2>
+        {messages.length > 0 && (
+          <button
+            onClick={clearChat}
+            className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors flex items-center gap-1"
+            title="Clear chat history"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Clear
+          </button>
+        )}
+      </div>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
@@ -236,7 +302,7 @@ export function ChatPanel() {
               className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 sm:px-4 py-2 ${
                   message.role === "user"
                     ? "bg-primary text-white"
                     : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -389,12 +455,12 @@ export function ChatPanel() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+      <div className="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4">
         <div className="mb-2">
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="text-sm px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full sm:w-auto text-sm px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             <option value="All">All Categories</option>
             <option value="technology">Technology</option>
@@ -409,14 +475,14 @@ export function ChatPanel() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask a question about the news..."
-            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             rows={2}
             disabled={isLoading}
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             {isLoading ? "..." : "Send"}
           </button>
