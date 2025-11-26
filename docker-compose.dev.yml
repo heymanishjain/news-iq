@@ -1,0 +1,58 @@
+version: '3.8'
+
+# Development docker-compose with hot reload
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: newsiq-backend-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=NewsIQ
+      - DATABASE_URL=sqlite:///./data/news_iq.db
+      - VECTOR_STORE_DIR=./data/storage/vector_store
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - NEWS_API_KEY=${NEWS_API_KEY:-}
+      - CHUNK_SIZE=600
+      - CHUNK_OVERLAP=120
+      - INGESTION_BATCH_SIZE=20
+      - HACKER_NEWS_LIMIT=30
+    volumes:
+      - backend-data:/app/data
+      - ./backend:/app
+      - ./backend/.env:/app/.env:ro
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    networks:
+      - newsiq-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: newsiq-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - newsiq-network
+
+volumes:
+  backend-data:
+    driver: local
+
+networks:
+  newsiq-network:
+    driver: bridge
+

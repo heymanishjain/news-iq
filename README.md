@@ -57,6 +57,106 @@ NewsIQ is a full-stack MVP that ingests technology and sports news, stores the c
    npm run dev
    ```
 
+## Docker Setup (Recommended)
+
+> **📖 For detailed Docker instructions, see [DOCKER.md](./DOCKER.md)**
+
+### Prerequisites
+- Docker and Docker Compose installed
+- OpenAI API key (required for RAG functionality)
+
+### Quick Start with Docker
+
+1. **Set up environment variables:**
+   ```bash
+   # Create backend .env file
+   cp backend/.env.example backend/.env
+   # Edit backend/.env and add your OPENAI_API_KEY
+   ```
+
+2. **Build and start all services:**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Run initial ingestion:**
+   ```bash
+   docker-compose exec backend python ingest.py
+   ```
+   Or use the helper script:
+   ```bash
+   ./scripts/docker-ingest.sh
+   ```
+
+4. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Health: http://localhost:8000/health
+
+### Docker Commands
+
+```bash
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Rebuild after code changes
+docker-compose up -d --build
+
+# Run ingestion
+docker-compose exec backend python ingest.py
+
+# Access backend shell
+docker-compose exec backend bash
+
+# Access frontend shell
+docker-compose exec frontend sh
+
+# Stop and remove volumes (clean slate)
+docker-compose down -v
+```
+
+### Development Mode with Hot Reload
+
+For development with hot reload:
+
+```bash
+# Use development compose file
+docker-compose -f docker-compose.dev.yml up
+```
+
+This will:
+- Enable hot reload for both backend and frontend
+- Mount source code as volumes
+- Use development Dockerfiles
+
+### Production Deployment
+
+For production, use the standard `docker-compose.yml`:
+
+```bash
+# Build production images
+docker-compose build
+
+# Start in detached mode
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+### Data Persistence
+
+- Database and vector store data are persisted in Docker volumes
+- Data location: `backend-data` volume
+- To backup: `docker run --rm -v newsiq_backend-data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz /data`
+- To restore: `docker run --rm -v newsiq_backend-data:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz -C /`
+
 ## API Reference
 
 ### `GET /health`
