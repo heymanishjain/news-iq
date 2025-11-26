@@ -110,9 +110,7 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({ q: "", category: "", dateFrom: "", dateTo: "" });
   const [searchTerm, setSearchTerm] = useState("");
-  const [isFiltersExpanded, setIsFiltersExpanded] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [isManualToggle, setIsManualToggle] = useState(false);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false); // Default: collapsed
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   useEffect(() => {
@@ -149,46 +147,9 @@ export default function NewsPage() {
     fetchArticles();
   }, [params]);
 
-  // Auto-collapse/expand on scroll (only if user hasn't manually toggled)
-  useEffect(() => {
-    const handleScroll = () => {
-      // Skip auto-collapse if user manually toggled recently
-      if (isManualToggle) {
-        setLastScrollY(window.scrollY);
-        return;
-      }
-
-      const currentScrollY = window.scrollY;
-      
-      // Only auto-collapse if scrolled down significantly (more than 100px)
-      if (currentScrollY > 100) {
-        if (currentScrollY > lastScrollY && isFiltersExpanded) {
-          // Scrolling down - collapse
-          setIsFiltersExpanded(false);
-        } else if (currentScrollY < lastScrollY && !isFiltersExpanded && currentScrollY < 50) {
-          // Scrolling up near top - expand
-          setIsFiltersExpanded(true);
-        }
-      } else if (currentScrollY < 50 && !isFiltersExpanded) {
-        // Near top - always expand
-        setIsFiltersExpanded(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY, isFiltersExpanded, isManualToggle]);
-
-  // Handle manual toggle
+  // Handle manual toggle - simple click to show/hide
   const handleToggleFilters = () => {
     setIsFiltersExpanded(!isFiltersExpanded);
-    setIsManualToggle(true);
-    // Reset manual toggle flag after a delay to allow auto-collapse again
-    setTimeout(() => {
-      setIsManualToggle(false);
-    }, 2000);
   };
 
   // Group articles by date
@@ -250,16 +211,16 @@ export default function NewsPage() {
           <div className={`space-y-4 transition-all duration-300 ease-in-out overflow-hidden ${
             isFiltersExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           }`}>
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
-            <FiltersBar filters={filters} onChange={(update) => setFilters((prev) => ({ ...prev, ...update }))} />
-          </div>
+        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        <FiltersBar filters={filters} onChange={(update) => setFilters((prev) => ({ ...prev, ...update }))} />
+      </div>
         </div>
       </div>
 
       {/* Content Section */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {loading ? (
-          <AnimatedLoadingSkeleton />
+      {loading ? (
+        <AnimatedLoadingSkeleton />
         ) : articles.length === 0 ? (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
@@ -269,8 +230,8 @@ export default function NewsPage() {
             </div>
             <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No articles found</p>
             <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters or search terms.</p>
-          </div>
-        ) : (
+            </div>
+          ) : (
           <div className="space-y-10">
             {Object.entries(groupedArticles).map(([dateGroup, dateArticles]) => (
               <div key={dateGroup} className="space-y-6">
@@ -293,10 +254,10 @@ export default function NewsPage() {
                           isLarge ? "md:col-span-2 lg:col-span-2" : ""
                         }`}
                       >
-                        <a
-                          href={article.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                           className="block h-full"
                         >
                           {/* Image Section */}
@@ -380,15 +341,15 @@ export default function NewsPage() {
                               Read full story
                               <svg
                                 className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
+                    </svg>
                             </div>
                           </div>
-                        </a>
+                  </a>
                       </article>
                     );
                   })}
@@ -396,8 +357,8 @@ export default function NewsPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+          )}
+        </div>
     </div>
   );
 }
