@@ -42,7 +42,7 @@
 ### Models & Schemas
 | File | Description |
 | --- | --- |
-| `app/models/article.py` | SQLAlchemy `Article` table with title/source/url/published_at/category/content timestamps. |
+| `app/models/article.py` | SQLAlchemy `Article` table with title/source/url/published_at/category/content/image_url timestamps. |
 | `app/schemas/article.py` | Pydantic models: `ArticleCreate`, `ArticleRead`, `ArticleListResponse`, `ArticleFilters`. |
 | `app/schemas/query.py` | Query payloads (`QueryFilters`, `QueryRequest`) and response objects (`QueryArticle`, `QueryResponse`). |
 
@@ -53,8 +53,8 @@
 | `app/services/vector_store.py` | Chroma wrapper. | `add_chunks`, `similarity_search` (supports metadata filtering). |
 | `app/services/llm_client.py` | OpenAI client wrapper. | `embed_texts`, `generate_response`, `generate_response_stream`. |
 | `app/services/ingestion/base_ingestor.py` | Abstract base for feed ingestors. | `fetch_articles()` signature. |
-| `app/services/ingestion/hn_ingestor.py` | Pulls Hacker News top stories. | Requests API, cleans HTML, tags as technology. |
-| `app/services/ingestion/rss_ingestor.py` | Fetches curated RSS feeds (Ars Technica, ESPN). | Parses entries, optional full-content fetch via `requests`. |
+| `app/services/ingestion/hn_ingestor.py` | Pulls Hacker News top stories. | Requests API, cleans HTML, tags as technology, sets image_url to None. |
+| `app/services/ingestion/rss_ingestor.py` | Fetches curated RSS feeds (Ars Technica, ESPN, The Hindu, The Indian Express). | Parses entries, extracts images from media_content/HTML, optional full-content fetch via `requests`. |
 | `app/services/ingestion/newsapi_ingestor.py` | Queries NewsAPI for multiple categories. | Handles API key, category looping, timestamp parsing. |
 | `app/services/ingestion/pipeline.py` | Shared ingestion logic. | `chunk_text`, `upsert_article`, `ingest_articles`, `run_ingestion`. |
 
@@ -91,19 +91,19 @@
 | `frontend/app/page.tsx` | Marketing hero with links to News and Ask sections. |
 | `frontend/app/news/page.tsx` | Client component fetching `/api/news`; uses `SearchBar`, `FiltersBar`, `AnimatedLoadingSkeleton`, and renders article cards. |
 | `frontend/app/ask-news-iq/page.tsx` | Wraps `ChatPanel` inside page layout. |
-| `frontend/app/articles/[id].tsx` | Server component fetching single article, renders full body or redirects via `ExternalRedirect`. |
+| ~~`frontend/app/articles/[id].tsx`~~ | ~~Removed: Articles now redirect directly to source URLs.~~ |
 
 ### Components
 | Component | Purpose | Key Props/State |
 | --- | --- | --- |
-| `Navigation.tsx` | Top nav with active highlighting + theme toggle. | Uses `usePathname`. |
+| `Navigation.tsx` | Top nav with active highlighting + theme toggle. Mobile hamburger menu for small screens. | Uses `usePathname`, responsive design. |
 | `ThemeProvider.tsx` | Context for dark/light theme; persists to `localStorage`. | Provides `theme`, `toggleTheme`. |
 | `ThemeToggle.tsx` | Button toggling theme context (sun/moon icons). | Reads context. |
 | `SearchBar.tsx` | Styled text input with focus glow. | Props: `value`, `onChange`. Local `isFocused` state. |
 | `FiltersBar.tsx` | Category + date filters. | Props: `filters`, `onChange`; uses `<select>` and `<input type="date">`. |
 | `AnimatedLoadingSkeleton.tsx` | Framer-motion animated placeholder grid. | Responsive via window width listener. |
-| `ChatPanel.tsx` | SSE chat UI with Markdown rendering and citation linking. | Manages `messages`, `input`, `category`, `AbortController`. |
-| `ExternalRedirect.tsx` | Client redirect helper when article missing but external URL known. | Prop: `url`. |
+| `ChatPanel.tsx` | SSE chat UI with Markdown rendering and citation linking. | Manages `messages`, `input`, `category`, `AbortController`. Persists chat history to localStorage, includes clear button. |
+| ~~`ExternalRedirect.tsx`~~ | ~~Removed: No longer needed as articles redirect directly to source URLs.~~ |
 | `components/ui/animated-loading-skeleton.tsx` | same as default export; namespaced path for UI folder. | - |
 
 ### Styles
@@ -113,8 +113,16 @@
 ## Misc
 | File | Purpose |
 | --- | --- |
-| `frontend/app/news/page.tsx` (inline helper) | Implements `useDebounce` hook for search term updates. |
-| `frontend/components/ChatPanel.tsx` | Contains `processArticleReferences` utility converting “Article X” mentions into Markdown links using SSE-provided mapping. |
+| `frontend/app/news/page.tsx` (inline helper) | Implements `useDebounce` hook for search term updates. Displays articles with images, date grouping, Google News-inspired layout. Fully responsive. |
+| `frontend/components/ChatPanel.tsx` | Contains `processArticleReferences` utility converting "Article X" mentions into Markdown links using SSE-provided mapping. Persists messages to localStorage with automatic save/load. |
+| `frontend/next.config.mjs` | Next.js config with image remotePatterns for external article images, unoptimized images for external URLs. |
+| `backend/migrate_add_image_url.py` | Standalone migration script to add `image_url` column to existing SQLite databases. |
+| `docker-compose.yml` | Production Docker Compose configuration for backend and frontend services. |
+| `docker-compose.dev.yml` | Development Docker Compose configuration with hot-reload support. |
+| `backend/Dockerfile` | Multi-stage Docker build for FastAPI backend with health checks. |
+| `frontend/Dockerfile` | Production Docker build for Next.js frontend. |
+| `frontend/Dockerfile.dev` | Development Docker build for Next.js with hot-reload. |
+| `DOCKER.md` | Comprehensive Docker setup, usage, and troubleshooting guide. |
 
 This map should help locate relevant logic quickly when extending or debugging NewsIQ.
 

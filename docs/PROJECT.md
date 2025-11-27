@@ -38,14 +38,15 @@ User ➜ Next.js (News feed, ChatPanel)
 
 ## Frontend Overview
 - Next.js 14 App Router with pages:
-  - `/` home hero linking to News feed and Ask NewsIQ.
-  - `/news` client-side list with filters, search, and animated skeleton while fetching `/api/news`.
-  - `/ask-news-iq` uses `ChatPanel` for live SSE chat with citations.
-  - `/articles/[id]` server-rendered article detail with fallback redirect if missing (using `ExternalRedirect`).
+  - `/` home hero linking to News feed and Ask NewsIQ with responsive card layouts.
+  - `/news` client-side list with filters, search, animated skeleton, and Google News-inspired layout with article thumbnails and date grouping. Fully responsive with mobile-optimized grid.
+  - `/ask-news-iq` uses `ChatPanel` for live SSE chat with citations and persistent chat history.
+  - ~~`/articles/[id]`~~ Removed: Articles now redirect directly to their source URLs.
 - Components:
-  - `ChatPanel` handles message state, SSE streaming, abortable fetch, Markdown rendering (ReactMarkdown + remark-gfm + rehype-raw), and article mapping for inline citations.
-  - `FiltersBar`, `SearchBar`, `AnimatedLoadingSkeleton`, `Navigation`, `ThemeProvider`, `ThemeToggle`, etc. provide reusable UI.
-- Styling handled by Tailwind (custom `primary` color) plus global CSS font + dark mode toggling via context and `<html class="dark">`.
+  - `ChatPanel` handles message state, SSE streaming, abortable fetch, Markdown rendering (ReactMarkdown + remark-gfm + rehype-raw), article mapping for inline citations, localStorage persistence, and clear chat button.
+  - `Navigation` includes mobile hamburger menu for responsive navigation.
+  - `FiltersBar`, `SearchBar`, `AnimatedLoadingSkeleton`, `ThemeProvider`, `ThemeToggle`, etc. provide reusable UI with responsive design.
+- Styling handled by Tailwind (custom `primary` color) plus global CSS font + dark mode toggling via context and `<html class="dark">`. Fully responsive across mobile, tablet, and desktop breakpoints.
 
 ## Folder Structure (condensed)
 ```
@@ -75,9 +76,10 @@ news-iq/
 ## Data Flow Details
 ### Ingestion Pipeline
 1. `run_ingestion()` ensures DB schema, initializes optional `LLMClient`, `VectorStore`, and iterates through `HackerNewsIngestor`, `RSSIngestor`, `NewsAPIIngestor`.
-2. Each ingestor returns `ArticleCreate` models with cleaned HTML content via `text_cleaning.clean_html`.
-3. `upsert_article` deduplicates by URL and refreshes SQLite rows.
+2. Each ingestor returns `ArticleCreate` models with cleaned HTML content via `text_cleaning.clean_html` and extracted `image_url` (from RSS media_content, HTML img tags, or NewsAPI urlToImage).
+3. `upsert_article` deduplicates by URL and refreshes SQLite rows, including `image_url` updates.
 4. Text is chunked (`chunk_size=600`, `chunk_overlap=120`), embedded via OpenAI, then persisted to Chroma along with metadata (title/source/category/date/url/snippet).
+5. RSS ingestor extracts images from `media_content`, `media_thumbnail`, HTML `<img>` tags, and Open Graph meta tags.
 
 ### Query / RAG Flow
 1. `/api/query` receives question + optional filters; `RAGService.answer_question` embeds question, calls `VectorStore.similarity_search`, and builds context text.
@@ -86,23 +88,24 @@ news-iq/
 4. Streaming variant yields incremental tokens and final article list + article-number mapping for UI.
 
 ## API & UI Workflow
-- Article feed: Next.js constructs query string from local filter state, fetches `/api/news`, and renders cards. Animated skeleton shows while requests are pending.
-- Article detail: server-side fetch with `cache: "no-store"`, enabling fallback to external redirect if not present locally.
-- Ask NewsIQ: `ChatPanel` POSTs to `/api/query/stream`, decodes SSE chunks in real time, updates Markdown content, and renders source list once `articles` arrive.
+- Article feed: Next.js constructs query string from local filter state, fetches `/api/news`, and renders cards with images, date grouping, and Google News-inspired layout. Animated skeleton shows while requests are pending. Articles link directly to source URLs.
+- Ask NewsIQ: `ChatPanel` POSTs to `/api/query/stream`, decodes SSE chunks in real time, updates Markdown content, renders source list once `articles` arrive, and persists all messages to localStorage for retrieval on page reload.
 - Admin refresh: POST `/api/admin/refresh` to enqueue ingestion without blocking HTTP response.
 
 ## State Management
 - React hooks (`useState`, `useEffect`, `useMemo`) manage filters, search debouncing, chat messages, and streaming progress.
 - Custom `useDebounce` function prevents excessive API calls while typing.
 - Theme context stores preference in `localStorage` and applies class to `<html>`.
+- Chat history persisted to `localStorage` with key `news_iq_chat_history`, automatically loaded on mount and saved on message changes.
 - AbortController ensures only one SSE request is active.
+- Mobile menu state managed in `Navigation` component for responsive hamburger menu.
 
 ## Reusable Components & Logic
-- `FiltersBar` accepts `filters` object and `onChange` callback for partial updates.
-- `SearchBar` controls focus styling and placeholder hints.
+- `FiltersBar` accepts `filters` object and `onChange` callback for partial updates. Responsive grid layout.
+- `SearchBar` controls focus styling and placeholder hints. Responsive icon and text sizes.
 - `AnimatedLoadingSkeleton` uses framer-motion to animate placeholder cards.
-- `ChatPanel` includes quick-question buttons, streaming markdown renderer, citation rewriting (`processArticleReferences`), and category dropdown.
-- `ExternalRedirect` gracefully handles missing articles by redirecting to `searchParams.source`.
+- `ChatPanel` includes quick-question buttons, streaming markdown renderer, citation rewriting (`processArticleReferences`), category dropdown, localStorage persistence, and clear chat button with confirmation.
+- `Navigation` provides responsive hamburger menu for mobile devices, collapsing nav links on small screens.
 
 ## Build & Configuration
 - Backend uses `.env` read by Pydantic; vector store directory auto-created via `vector_store_path`.
@@ -111,6 +114,8 @@ news-iq/
   - `npm run build` + `npm run start` for production.
   - `npm run lint` uses Next lint defaults.
 - Tailwind compiled via PostCSS (autoprefixer) with content globs for `app/` and `components/`.
+- Docker support: `docker-compose.yml` for production, `docker-compose.dev.yml` for development with hot-reload.
+- Next.js image configuration allows external images via `remotePatterns` with `unoptimized: true` for external URLs.
 
 ## AuthN/AuthZ
 - No authentication currently. CORS restricts to local origins; TODO for future: add auth tokens or session management before exposing publicly.
@@ -118,6 +123,8 @@ news-iq/
 ## Database & Storage
 - SQLite (default) accessed through SQLAlchemy; `DATABASE_URL` can be overridden for Postgres/MySQL.
 - Chroma persistent client stores vector data under `storage/vector_store`. Each chunk recorded with metadata enabling filter queries.
+- `Article` model includes `image_url` column (VARCHAR(512), nullable) for storing article thumbnail URLs.
+- Migration script `migrate_add_image_url.py` available for adding `image_url` to existing databases.
 
 ## Business Logic & Error Handling
 - Deduplication by URL ensures repeated ingestion updates existing articles.
@@ -127,10 +134,13 @@ news-iq/
 - FastAPI startup only instantiates RAGService when `OPENAI_API_KEY` exists (prevents runtime errors).
 
 ## Edge Cases & Resilience
-- If similarity search returns no results, service responds with “No relevant articles found.”
+- If similarity search returns no results, service responds with "No relevant articles found."
 - SSE reader handles partial buffers and newline-separated events.
-- Article detail fallback ensures user still reaches source even if DB missing record.
+- Articles link directly to source URLs, ensuring users always reach original content.
+- Image loading errors handled with fallback display showing category/source badges.
 - Vector store path creation ensures directories exist before writes.
+- localStorage chat history gracefully handles parse errors and missing data.
+- Responsive design ensures usability across all screen sizes with mobile-first approach.
 
 ## End-to-End Summary
 1. Run ingestion (cron or manual) to populate SQLite + Chroma.

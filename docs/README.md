@@ -22,16 +22,19 @@ User ➜ Next.js UI ➜ FastAPI /api/query ➜ RAGService ➜ OpenAI
 | --- | --- |
 | Backend | FastAPI, SQLAlchemy, SQLite, Pydantic, ChromaDB, OpenAI API, Uvicorn |
 | Frontend | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Framer Motion, React Markdown, SSE |
-| Tooling | PyEnv/Pip, npm, PostCSS/Autoprefixer, pytest |
+| Tooling | PyEnv/Pip, npm, PostCSS/Autoprefixer, pytest, Docker, Docker Compose |
 
 ## Features
-- Scheduled or manual ingestion from Hacker News, curated RSS feeds, and NewsAPI.
-- Deduplicated article storage with categories, timestamps, and cleaned body text.
+- Scheduled or manual ingestion from Hacker News, curated RSS feeds (Ars Technica, ESPN, The Hindu, The Indian Express), and NewsAPI.
+- Deduplicated article storage with categories, timestamps, cleaned body text, and image URLs.
 - Chunking + embedding pipeline that streams context into Chroma for semantic search.
-- REST API for listing articles, fetching details, refreshing ingestion, and running RAG queries (sync + SSE stream).
+- REST API for listing articles, refreshing ingestion, and running RAG queries (sync + SSE stream).
 - Next.js dashboard with filters, debounced search, animated loading skeleton, and chat-like Ask NewsIQ panel.
-- Dark/light theme toggling and responsive layouts.
+- Dark/light theme toggling and fully responsive layouts (mobile, tablet, desktop).
 - Source citations rendered inline with Markdown & link tracking.
+- Chat history persistence using localStorage (no authentication required).
+- Google News-inspired UI with article thumbnails and date grouping.
+- Docker support for easy deployment and development.
 
 ## Prerequisites
 - Python 3.10.x (pyenv recommended)
@@ -116,6 +119,7 @@ See `backend/.env.example` and `frontend/.env.example` for all available configu
 - **Frontend dev server**: `cd frontend && npm run dev`.
 - **Tests**: `cd backend && pytest`.
 - **Vector store reset**: delete `storage/vector_store/*` + rerun ingestion to reclaim space.
+- **Docker setup**: See [DOCKER.md](../DOCKER.md) for complete Docker instructions, or run `docker-compose up -d` for quick start.
 
 ## Build Commands
 - Backend production: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4` or `gunicorn -k uvicorn.workers.UvicornWorker app.main:app`.
@@ -144,6 +148,15 @@ See `backend/.env.example` and `frontend/.env.example` for all available configu
 3. **Prompt**: `_build_context` builds bullet list of excerpts with title/source/date/snippet.
 4. **Generation**: OpenAI chat completion (`gpt-4o-mini`) answers with citations.
 5. **Response**: API returns final text and structured article list for UI display.
+
+## Recent Updates
+- ✅ Chat history persistence using localStorage (no authentication required).
+- ✅ Image URL support for articles with fallback handling.
+- ✅ Responsive design improvements (mobile hamburger menu, adaptive layouts).
+- ✅ Additional RSS feeds (The Hindu, The Indian Express).
+- ✅ Google News-inspired UI with thumbnails and date grouping.
+- ✅ Docker support for development and production.
+- ✅ Clear chat history button with confirmation.
 
 ## Future Enhancements
 - Scheduled ingestion via cron/worker queues.
