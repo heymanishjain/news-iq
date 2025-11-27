@@ -5,18 +5,41 @@ NewsIQ is a full-stack MVP that ingests technology and sports news, stores the c
 ## Architecture
 
 ```
-+-----------------+      +------------------+      +-----------------+
-| Hacker News API |      |  RSS Feeds       |      |  ingest.py CLI  |
-+--------+--------+      +--------+---------+      +--------+--------+
+                             +-------------------------+
+                             |    docker-compose /     |
+                             |    local dev scripts    |
+                             +-----------+-------------+
+                                         |
++-----------------+    +---------------------+    +-----------------+
+| Hacker News API |    |    RSS Feeds        |    |    NewsAPI      |
+| (technology)    |    | (Ars, ESPN, The     |    | (multi-category |
++--------+--------+    |  Hindu, Indian Exp) |    |  headlines)     |
+         |             +----------+----------+    +--------+--------+
          |                        |                         |
-         v                        v                         v
-  [Ingestors] ---> [SQLite Articles] ---> [Chroma Vector Store] <--- [Embeddings]
-         |                        |                         ^
-         v                        v                         |
-   FastAPI REST API  <------>  RAG Service  <------>  OpenAI GPT-4.1-mini
-         |
-         v
-  Next.js + Tailwind UI
+         +-----------[ Ingestion Services ]-----------------+
+                              |
+                              v
+                     [ SQLite (articles + image_url) ]
+                              |
+                     [ Chroma Vector Store ]
+                              ^
+                              |
+                         OpenAI Embeddings
+                              |
+                              v
+                      +---------------+
+                      | FastAPI + RAG |
+                      |  (REST + SSE) |
+                      +-------+-------+
+                              |
+                              v
+         +-----------------------------------------------+
+         |            Next.js + Tailwind UI              |
+         |-----------------------------------------------|
+         |  /news feed (Google News layout, filters)     |
+         |  /ask-news-iq (ChatPanel + localStorage)      |
+         |  Responsive navigation + dark/light mode      |
+         +-----------------------------------------------+
 ```
 
 ## Backend Setup (FastAPI)
