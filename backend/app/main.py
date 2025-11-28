@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,6 +8,12 @@ from app.api.routes_news import router as news_router
 from app.api.routes_query import router as query_router
 from app.core.config import get_settings
 from app.core.db import Base, engine
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 settings = get_settings()
 app = FastAPI(title=settings.app_name)

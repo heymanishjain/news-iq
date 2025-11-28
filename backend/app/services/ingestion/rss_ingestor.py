@@ -31,6 +31,16 @@ RSS_FEEDS = [
         "category": "general",
         "source": "The Indian Express",
     },
+    {
+        "url": "https://sportstar.thehindu.com/cricket/feeder/default.rss",
+        "category": "sports",
+        "source": "Sportstar",
+    },
+    {
+        "url": "https://crickettimes.com/feed/",
+        "category": "sports",
+        "source": "Cricket Times",
+    }
 ]
 
 

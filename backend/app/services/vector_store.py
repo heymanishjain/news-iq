@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import chromadb
 
 from app.core.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 
 class VectorStore:
@@ -54,12 +57,25 @@ class VectorStore:
             if date_to:
                 date_filter["$lte"] = date_to.isoformat()
             where["published_at"] = date_filter
+        # Check collection count for debugging
+        collection_count = self.collection.count()
+        logger.info(f"Vector store collection has {collection_count} items. Querying with top_k={top_k}, category={category}, date_from={date_from}, date_to={date_to}")
+        
         results = self.collection.query(query_embeddings=[embedding], n_results=top_k, where=where)
-        metadatas = results.get("metadatas", [[]])[0]
-        documents = results.get("documents", [[]])[0]
-        distances = results.get("distances", [[]])[0]
+        metadatas = results.get("metadatas", [[]])[0] or []
+        documents = results.get("documents", [[]])[0] or []
+        distances = results.get("distances", [[]])[0] or []
+        
+        logger.info(f"Query returned {len(documents)} documents, {len(metadatas)} metadatas")
+        
         records = []
         for meta, doc, distance in zip(metadatas, documents, distances):
-            record = {**meta, "document": doc, "score": distance}
-            records.append(record)
+            # Only include records with valid document content
+            if doc and doc.strip():
+                record = {**meta, "document": doc, "score": distance}
+                records.append(record)
+            else:
+                logger.warning(f"Skipping record with empty document. Metadata: {meta}")
+        
+        logger.info(f"Returning {len(records)} valid records after filtering")
         return records
